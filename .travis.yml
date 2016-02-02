@@ -14,7 +14,7 @@ after_success:
   - codecov
 script:
   - "nosetests -a \"!slow\""
-  - "python example_annotate.py -c ./crfsuite-0.12/bin/ -d ./resources/example.txt"
+  - "python example_annotate.py -c ./crfsuite-0.12/bin/ -p 2581245"
 branches:
   only:
     - master
