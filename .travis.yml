@@ -8,7 +8,6 @@ install:
 before_script:
   - "python -m nalaf.download_corpora"
   - pip install codecov
-  - pip install python-crfsuite
 after_success:
   - codecov
 script:
