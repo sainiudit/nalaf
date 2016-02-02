@@ -7,14 +7,12 @@ install:
   - "pip install ."
 before_script:
   - "python -m nalaf.download_corpora"
-  - "curl -L https://github.com/downloads/chokkan/crfsuite/crfsuite-0.12-x86_64.tar.gz -o crfsuite.tar.gz"
-  - "tar -xvf crfsuite.tar.gz"
   - pip install codecov
 after_success:
   - codecov
 script:
   - "nosetests -a \"!slow\""
-  - "python example_annotate.py -c ./crfsuite-0.12/bin/ -p 2581245"
+  - "python example_annotate.py -p 2581245"
 branches:
   only:
     - master
