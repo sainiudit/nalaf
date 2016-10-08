@@ -336,6 +336,13 @@ class MentionLevelEvaluator(Evaluator):
         Whether to report the performance for each subclass separately
         """
 
+    def gen_entity_uniq_id(docid, partid, e):
+        """
+        e == entity
+        """
+        uid = '|'.join([str(x) for x in [docid, partid, e.class_id, (str(e.offset) + ',' + str(len(e.text))), e.subclass]])
+        return "    '" + uid + "',"
+
     def evaluate(self, dataset):
         """
         :type dataset: nalaf.structures.data.Dataset
@@ -397,12 +404,20 @@ class MentionLevelEvaluator(Evaluator):
                 for ann in part.predicted_annotations:
                     if ann in part.annotations:
                         counts[TOTAL][docid]['tp'] += 1
+
+                        print(MentionLevelEvaluator.gen_entity_uniq_id(docid, partid, part.annotations[part.annotations.index(ann)]))
+
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['tp'] += 1
                     else:
                         counts[TOTAL][docid]['fp'] += 1
                         if ann in overlap_predicted[TOTAL]:
                             counts[TOTAL][docid]['fp_ov'] += 1
+
+                            Entity.equality_operator = 'overlapping'
+                            print(MentionLevelEvaluator.gen_entity_uniq_id(docid, partid, overlap_real[TOTAL][overlap_real[TOTAL].index(ann)]))
+                            Entity.equality_operator = 'exact'
+
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['fp'] += 1
                             if ann in overlap_predicted[ann.subclass]:
@@ -413,6 +428,9 @@ class MentionLevelEvaluator(Evaluator):
                         counts[TOTAL][docid]['fn'] += 1
                         if ann in overlap_real[TOTAL]:
                             counts[TOTAL][docid]['fn_ov'] += 1
+
+                            print(MentionLevelEvaluator.gen_entity_uniq_id(docid, partid, ann))
+
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['fn'] += 1
                             if ann in overlap_real[ann.subclass]:
