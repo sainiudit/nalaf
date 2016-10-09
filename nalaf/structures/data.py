@@ -1309,7 +1309,8 @@ class Entity:
         Caveat: do not rely on the exact format as this may change in the future.
         However, you can still use the identifier to do set comparisons.
         """
-        elements = [docid, partid, self.class_id, (str(self.offset) + ',' + str(len(self.text))), self.subclass]
+        offsets = (str(self.offset) + ',' + str(self.offset + len(self.text)))
+        elements = [docid, partid, self.class_id, self.subclass, offsets, self.text]
         uid = '|'.join([str(x) for x in elements])
         return uid
 
