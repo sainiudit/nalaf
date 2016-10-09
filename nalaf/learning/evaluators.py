@@ -336,13 +336,6 @@ class MentionLevelEvaluator(Evaluator):
         Whether to report the performance for each subclass separately
         """
 
-    def gen_entity_uniq_id(docid, partid, e):
-        """
-        e == entity
-        """
-        uid = '|'.join([str(x) for x in [docid, partid, e.class_id, (str(e.offset) + ',' + str(len(e.text))), e.subclass]])
-        return "    '" + uid + "',"
-
     def evaluate(self, dataset):
         """
         :type dataset: nalaf.structures.data.Dataset
@@ -405,7 +398,8 @@ class MentionLevelEvaluator(Evaluator):
                     if ann in part.annotations:
                         counts[TOTAL][docid]['tp'] += 1
 
-                        print(MentionLevelEvaluator.gen_entity_uniq_id(docid, partid, part.annotations[part.annotations.index(ann)]))
+                        e = part.annotations[part.annotations.index(ann)]
+                        print(e.gen_corpus_uniq_id(docid, partid))
 
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['tp'] += 1
@@ -415,7 +409,8 @@ class MentionLevelEvaluator(Evaluator):
                             counts[TOTAL][docid]['fp_ov'] += 1
 
                             Entity.equality_operator = 'overlapping'
-                            print(MentionLevelEvaluator.gen_entity_uniq_id(docid, partid, overlap_real[TOTAL][overlap_real[TOTAL].index(ann)]))
+                            e = overlap_real[TOTAL][overlap_real[TOTAL].index(ann)]
+                            print(e.gen_corpus_uniq_id(docid, partid))
                             Entity.equality_operator = 'exact'
 
                         if self.subclass_analysis:
@@ -429,7 +424,8 @@ class MentionLevelEvaluator(Evaluator):
                         if ann in overlap_real[TOTAL]:
                             counts[TOTAL][docid]['fn_ov'] += 1
 
-                            print(MentionLevelEvaluator.gen_entity_uniq_id(docid, partid, ann))
+                            e = ann
+                            print(e.gen_corpus_uniq_id(docid, partid))
 
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['fn'] += 1

@@ -1304,6 +1304,15 @@ class Entity:
     can be "exact" or "overlapping" or "exact_or_overlapping"
     """
 
+    def gen_corpus_uniq_id(self, docid, partid):
+        """
+        Caveat: do not rely on the exact format as this may change in the future.
+        However, you can still use the identifier to do set comparisons.
+        """
+        elements = [docid, partid, self.class_id, (str(self.offset) + ',' + str(len(self.text))), self.subclass]
+        uid = '|'.join([str(x) for x in elements])
+        return uid
+
     def __repr__(self):
         norm_string = ''
         if self.normalisation_dict:
