@@ -336,6 +336,10 @@ class MentionLevelEvaluator(Evaluator):
         Whether to report the performance for each subclass separately
         """
 
+    @staticmethod
+    def wrap(x):
+        return "      '" + x + "',"
+
     def evaluate(self, dataset):
         """
         :type dataset: nalaf.structures.data.Dataset
@@ -399,7 +403,7 @@ class MentionLevelEvaluator(Evaluator):
                         counts[TOTAL][docid]['tp'] += 1
 
                         e = part.annotations[part.annotations.index(ann)]
-                        print(e.gen_corpus_uniq_id(docid, partid))
+                        print(MentionLevelEvaluator.wrap(e.gen_corpus_uniq_id(docid, partid)))
 
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['tp'] += 1
@@ -408,10 +412,12 @@ class MentionLevelEvaluator(Evaluator):
                         if ann in overlap_predicted[TOTAL]:
                             counts[TOTAL][docid]['fp_ov'] += 1
 
-                            Entity.equality_operator = 'overlapping'
-                            e = overlap_real[TOTAL][overlap_real[TOTAL].index(ann)]
-                            print(e.gen_corpus_uniq_id(docid, partid))
-                            Entity.equality_operator = 'exact'
+                            # No need to print the fp_ov since it's always paired with a fn_ov (printed below)
+                            #
+                            # Entity.equality_operator = 'overlapping'
+                            # e = overlap_real[TOTAL][overlap_real[TOTAL].index(ann)]
+                            # print(MentionLevelEvaluator.wrap(e.gen_corpus_uniq_id(docid, partid)))
+                            # Entity.equality_operator = 'exact'
 
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['fp'] += 1
@@ -425,7 +431,7 @@ class MentionLevelEvaluator(Evaluator):
                             counts[TOTAL][docid]['fn_ov'] += 1
 
                             e = ann
-                            print(e.gen_corpus_uniq_id(docid, partid))
+                            print(MentionLevelEvaluator.wrap(e.gen_corpus_uniq_id(docid, partid)))
 
                         if self.subclass_analysis:
                             counts[ann.subclass][docid]['fn'] += 1
