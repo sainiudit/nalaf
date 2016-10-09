@@ -413,10 +413,12 @@ class MentionLevelEvaluator(Evaluator):
                             counts[TOTAL][docid]['fp_ov'] += 1
 
                             # No need to print the fp_ov since it's always paired with a fn_ov (printed below)
-                            #
+                            # Actually, it's paired once or even more, in the case a prediction spans over multiple gold entities (and then, overlap_predicted[TOTAL].count(ann) > 1)
                             # Entity.equality_operator = 'overlapping'
-                            # e = overlap_real[TOTAL][overlap_real[TOTAL].index(ann)]
-                            # print(MentionLevelEvaluator.wrap(e.gen_corpus_uniq_id(docid, partid)))
+                            # print("$", overlap_predicted[TOTAL].count(ann))
+                            # for e in overlap_real[TOTAL]:
+                            #     if e == ann:
+                            #         print(MentionLevelEvaluator.wrap(e.gen_corpus_uniq_id(docid, partid)))
                             # Entity.equality_operator = 'exact'
 
                         if self.subclass_analysis:
