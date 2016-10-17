@@ -338,7 +338,7 @@ class MentionLevelEvaluator(Evaluator):
 
     @staticmethod
     def wrap(x):
-        return "      '" + x + "',"
+        return "      '" + x.replace("'", "\\'") + "',"
 
     def evaluate(self, dataset):
         """
