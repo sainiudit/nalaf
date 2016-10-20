@@ -1,0 +1,18 @@
+language: python
+python:
+  - "3.3"
+  - "3.4"
+install:
+  - "pip install ."
+before_script:
+  - "python -m nalaf.download_corpora"
+  - pip install codecov
+after_success:
+  - codecov
+script:
+  - "nosetests -a \"!slow\""
+  - "python example_annotate.py -p 2581245"
+branches:
+  only:
+    - master
+    - develop
