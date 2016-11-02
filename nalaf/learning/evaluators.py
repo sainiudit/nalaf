@@ -4,6 +4,7 @@ from nalaf import print_verbose, print_debug
 from collections import namedtuple
 import random
 import math
+import re
 
 class Evaluation:
 
@@ -365,8 +366,22 @@ class MentionLevelEvaluator(Evaluator):
         subcounts = ['tp', 'fp', 'fn', 'fp_ov', 'fn_ov']
         counts = {label: {docid: dict.fromkeys(subcounts, 0) for docid in docids} for label in labels}
 
+        def matches(ann):
+            genetic_marker_regex = re.compile(r'\bD\d+([A-Z]\d+)?S\d{2,}\b')
+            rs_id_regex = re.compile(r'\b\[?rs\]? *\d{3,}(,\d+)*\b')
+            ss_id_regex = re.compile(r'\b\[?ss\]? *\d{3,}(,\d+)*\b')
+
+            return genetic_marker_regex.search(ann.text) or rs_id_regex.search(ann.text) or ss_id_regex.search(ann.text)
+            # return genetic_marker_regex.search(ann.text)
+            # return rs_id_regex.search(ann.text) or ss_id_regex.search(ann.text)
+            # return False
+
         for docid, doc in dataset.documents.items():
             for partid, part in doc.parts.items():
+
+                part.annotations = [ann for ann in part.annotations if not matches(ann)]
+                part.predicted_annotations = [ann for ann in part.predicted_annotations if not matches(ann)]
+
                 tests = ' || '.join(sorted(ann.text for ann in part.annotations))
                 preds = ' || '.join(sorted(ann.text for ann in part.predicted_annotations))
                 if tests != preds:
