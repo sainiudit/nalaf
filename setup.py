@@ -10,6 +10,7 @@ def license():
     with open('LICENSE.txt', encoding='utf-8') as file:
         return file.read()
 
+
 setup(
     name='nalaf',
     version='0.2.0',
