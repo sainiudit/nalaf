@@ -88,7 +88,6 @@ class RelationExtractionPipeline:
         for feature_generator in self.feature_generators:
             feature_generator.generate(dataset, self.feature_set, train)
 
-
     def _verify_feature_generators(self, feature_generators):
         if hasattr(feature_generators, '__iter__'):
             for index, feature_generator in enumerate(feature_generators):

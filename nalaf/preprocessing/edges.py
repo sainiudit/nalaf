@@ -54,6 +54,60 @@ class SimpleEdgeGenerator(EdgeGenerator):
                     part.edges.append(
                         Edge(ann_1, ann_2, self.relation_type, part.sentences[index_1], index_1, part))
 
+    def count_relations_in_D0(self, dataset):
+        from itertools import product, chain
+
+        count = 0
+        for part in dataset.parts():
+            part.edges = []
+            for ann_1, ann_2 in product(
+                    (ann for ann in chain(part.annotations, part.predicted_annotations) if ann.class_id == self.entity1_class),
+                    (ann for ann in chain(part.annotations, part.predicted_annotations) if ann.class_id == self.entity2_class)):
+
+                index_1 = part.get_sentence_index_for_annotation(ann_1)
+                index_2 = part.get_sentence_index_for_annotation(ann_2)
+
+                if index_1 == index_2 and index_1 is not None:
+                    count += 1
+
+        return count
+
+    def count_relations_in_D1_D2_D3_D4(self, dataset):
+        from itertools import product, chain
+
+        count_D1 = 0
+        count_D2 = 0
+        count_D3 = 0
+        count_D4_plus = 0
+        for part in dataset.parts():
+            part.edges = []
+            for ann_1, ann_2 in product(
+                    (ann for ann in chain(part.annotations, part.predicted_annotations) if ann.class_id == self.entity1_class),
+                    (ann for ann in chain(part.annotations, part.predicted_annotations) if ann.class_id == self.entity2_class)):
+
+                index_1 = part.get_sentence_index_for_annotation(ann_1)
+                index_2 = part.get_sentence_index_for_annotation(ann_2)
+
+                if index_1 > index_2:
+                    if index_1 - index_2 == 1:
+                        count_D1 += 1
+                    elif index_1 - index_2 == 2:
+                        count_D2 += 1
+                    elif index_1 - index_2 == 3:
+                        count_D3 += 1
+                    else:
+                        count_D4_plus += 1
+                elif index_2 > index_1:
+                    if index_2 - index_1 == 1:
+                        count_D1 += 1
+                    elif index_2 - index_1 == 2:
+                        count_D2 += 1
+                    elif index_2 - index_1 == 3:
+                        count_D3 += 1
+                    else:
+                        count_D4_plus += 1
+
+        return count_D1, count_D2, count_D3, count_D4_plus
 
 class WordFilterEdgeGenerator(EdgeGenerator):
     """
