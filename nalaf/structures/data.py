@@ -40,7 +40,6 @@ class Dataset:
     def __contains__(self, item):
         return item in self.documents
 
-
     def parts(self):
         """
         helper functions that iterates through all parts
@@ -51,7 +50,6 @@ class Dataset:
         for document in self:
             for part in document:
                 yield part
-
 
     def annotations(self):
         """
@@ -64,7 +62,6 @@ class Dataset:
             for annotation in part.annotations:
                 yield annotation
 
-
     def predicted_annotations(self):
         """
         helper functions that iterates through all parts
@@ -76,7 +73,6 @@ class Dataset:
             for annotation in part.predicted_annotations:
                 yield annotation
 
-
     def relations(self):
         """
         helper function that iterates through all relations
@@ -86,7 +82,6 @@ class Dataset:
             for rel in part.relations:
                 yield rel
 
-
     def predicted_relations(self):
         """
         helper function that iterates through all predicted relations
@@ -95,7 +90,6 @@ class Dataset:
         for part in self.parts():
             for relation in part.predicted_relations:
                 yield relation
-
 
     def sentences(self):
         """
@@ -108,7 +102,6 @@ class Dataset:
             for sentence in part.sentences:
                 yield sentence
 
-
     def tokens(self):
         """
         helper functions that iterates through all tokens
@@ -119,7 +112,6 @@ class Dataset:
         for sentence in self.sentences():
             for token in sentence:
                 yield token
-
 
     def edges(self):
         """
@@ -229,7 +221,6 @@ class Dataset:
 
         return self
 
-
     def form_predicted_relations(self):
         """
         Populates part.predicted_relations with a list of Relation objects
@@ -255,9 +246,8 @@ class Dataset:
         """
         for part in self.parts():
             for ann in part.predicted_annotations:
-                if not ann.text == part.text[ann.offset:ann.offset+len(ann.text)]:
+                if not ann.text == part.text[ann.offset:ann.offset + len(ann.text)]:
                     warnings.warn('the offsets do not match in {}'.format(ann))
-
 
     def generate_top_stats_array(self, class_id, top_nr=10, is_alpha_only=False):
         """
@@ -281,7 +271,6 @@ class Dataset:
         sort_dict = OrderedDict(sorted(raw_dict.items(), key=lambda x: x[1], reverse=True))
         print(json.dumps(sort_dict, indent=4))
 
-
     def clean_subclasses(self):
         """
         cleans all subclass by setting them to = False
@@ -289,25 +278,21 @@ class Dataset:
         for ann in self.annotations():
             ann.subclass = False
 
-
     def get_size_chars(self):
         """
         :return: total number of chars in this dataset
         """
         return sum(doc.get_size() for doc in self.documents.values())
 
-
     def __repr__(self):
         return "Dataset({0} documents and {1} annotations)".format(len(self.documents),
                                                                    sum(1 for _ in self.annotations()))
-
 
     def __str__(self):
         second_part = "\n".join(
             ["---DOCUMENT---\nDocument ID: '" + pmid + "'\n" + str(doc) for pmid, doc in self.documents.items()])
         return "----DATASET----\nNr of documents: " + str(len(self.documents)) + ', Nr of chars: ' + str(
             self.get_size_chars()) + '\n' + second_part
-
 
     def extend_dataset(self, other):
         """
@@ -318,7 +303,6 @@ class Dataset:
         for key in other.documents:
             if key not in self.documents:
                 self.documents[key] = other.documents[key]
-
 
     def prune_empty_parts(self):
         """
@@ -342,7 +326,8 @@ class Dataset:
             tmp = []
             tmp_ = []
             for index, sentence in enumerate(part.sentences):
-                do_use = not empty_sentence(sentence) or filterin(part.sentences_[index]) or random.uniform(0, 1) < percent_to_keep
+                do_use = not empty_sentence(sentence) or filterin(part.sentences_[index]) or random.uniform(0,
+                                                                                                            1) < percent_to_keep
                 if do_use:
                     tmp.append(sentence)
                     tmp_.append(part.sentences_[index])
@@ -365,7 +350,7 @@ class Dataset:
             if any(sentences_have_ann):
                 # choose a certain percentage of the ones that have no mention
                 false_indices = [index for index in range(len(part.sentences)) if not sentences_have_ann[index]]
-                chosen = random.sample(false_indices, round(percent_to_keep*len(false_indices)))
+                chosen = random.sample(false_indices, round(percent_to_keep * len(false_indices)))
 
                 # keep the sentence if it has a mention or it was chosen randomly
                 part.sentences = [sentence for index, sentence in enumerate(part.sentences)
@@ -398,9 +383,9 @@ class Dataset:
             return [i % k for i in list(range(fold, fold + k))]
 
         subsamples = folds(k, fold)
-        training = subsamples[0:k-2]
-        validation = subsamples[k-2:k-1]
-        test = subsamples[k-1:k]
+        training = subsamples[0:k - 2]
+        validation = subsamples[k - 2:k - 1]
+        test = subsamples[k - 1:k]
 
         if validation_set:
             test = []
@@ -412,12 +397,11 @@ class Dataset:
             ret = []
             for sub in subsample_indexes:
                 start = sub_size * sub
-                end = (start + sub_size) if sub != (k-1) else total_size  # k-1 is the last subsample index
+                end = (start + sub_size) if sub != (k - 1) else total_size  # k-1 is the last subsample index
                 ret += l[start:end]
             return ret
 
         return (create_set(training), create_set(validation), create_set(test))
-
 
     def cv_kfold_split(self, k, fold, validation_set=True):
         keys = list(sorted(self.documents.keys()))
@@ -433,7 +417,6 @@ class Dataset:
         training, validation, test = Dataset._cv_kfold_split(keys, k, fold, validation_set)
 
         return (create_dataset(training), create_dataset(validation), create_dataset(test))
-
 
     def fold_nr_split(self, n, fold_nr):
         """
@@ -482,12 +465,11 @@ class Dataset:
             return train, test
 
         if fold_nr:
-            assert(0 <= fold_nr < n)
+            assert (0 <= fold_nr < n)
             yield get_fold(fold_nr)
         else:
             for fold_nr in range(n):
                 yield get_fold(fold_nr)
-
 
     def percentage_split(self, percentage=0.66):
         """
@@ -593,11 +575,12 @@ class Document:
     def __repr__(self):
         if self.get_text() == self.get_body():
             return 'Document(Size: {}, Text: "{}", Annotations: "{}")'.format(len(self.parts), self.get_text(),
-                                                                                 self.get_unique_mentions())
+                                                                              self.get_unique_mentions())
         else:
             return 'Document(Size: {}, Title: "{}", Text: "{}", Annotations: "{}")'.format(len(self.parts),
-                                                                                               self.get_title(),
-                                                                       self.get_text(), self.get_unique_mentions())
+                                                                                           self.get_title(),
+                                                                                           self.get_text(),
+                                                                                           self.get_unique_mentions())
 
     def __str__(self):
         partslist = ['--PART--\nPart ID: "' + partid + '"\n' + str(part) + "\n" for partid, part in self.parts.items()]
@@ -649,7 +632,6 @@ class Document:
         ret = set(relations)
 
         return ret
-
 
     def relations(self):
         """  helper function for providing an iterator of relations on document level """
@@ -758,7 +740,7 @@ class Document:
                 print_debug("QUERY:".ljust(10) + "o" * (start - offset) + "X" * (end - start + 1) + "o" * (
                     len(part.text) - end + offset - 1))
                 print_debug("CURRENT:".ljust(10) + ann.text.rjust(ann.offset + len(ann.text), 'o') + 'o' * (
-                        len(part.text) - ann.offset + len(ann.text) - 2))
+                    len(part.text) - ann.offset + len(ann.text) - 2))
                 if start < ann.offset + offset + len(ann.text) and ann.offset + offset <= end:
                     print_verbose('=====\nFOUND\n=====')
                     print_verbose("TEXT:".ljust(10) + part.text)
@@ -832,7 +814,6 @@ class Part:
         self.tokens = []
         # TODO what's this?
 
-
     def get_sentence_string_array(self):
         """ :returns an array of string in which each index contains one sentence in type string with spaces between tokens """
 
@@ -848,7 +829,6 @@ class Part:
                 return_array.append(new_sentence.rstrip())  # to delete last space
             return return_array
 
-
     def get_sentence_index_for_annotation(self, annotation):
 
         for sentence_index, sentence in enumerate(self.sentences):
@@ -856,12 +836,10 @@ class Part:
 
             sentence_start = sentence[0].start
             sentence_end = sentence[-1].end
-
             if sentence_start <= annotation.offset < sentence_end:
-                    return sentence_index
+                return sentence_index
 
         assert False, ("The annotation did not (and should) have an associated sentence. Ann: " + str(annotation))
-
 
     def get_entities_in_sentence(self, sentence_id, entity_classId):
         """
@@ -881,7 +859,6 @@ class Part:
                 entities.append(annotation)
         return entities
 
-
     def percolate_tokens_to_entities(self, annotated=True):
         """
         if entity start and token start, and entity end and token end match,
@@ -896,7 +873,7 @@ class Part:
             for sentence in self.sentences:
                 for token in sentence:
                     if entity.offset <= token.start < entity_end or \
-                        token.start <= entity.offset < token.end:
+                                            token.start <= entity.offset < token.end:
                         entity.tokens.append(token)
 
     # TODO move to edge features
@@ -907,7 +884,7 @@ class Part:
         """
         not_tokens = []
         important_dependencies = ['det', 'amod', 'appos', 'npadvmod', 'compound',
-                'dep', 'with', 'nsubjpass', 'nsubj', 'neg', 'prep', 'num', 'punct']
+                                  'dep', 'with', 'nsubjpass', 'nsubj', 'neg', 'prep', 'num', 'punct']
         for sentence in self.sentences:
             for token in sentence:
                 if token.word not in not_tokens:
@@ -918,7 +895,7 @@ class Part:
             done = False
             counter = 0
 
-            while(not done):
+            while (not done):
                 done = True
                 for token in sentence:
                     dep_from = token.features['dependency_from'][0]
@@ -980,15 +957,18 @@ class Part:
                '-Predicted annotations-\n{pred_annotations}\n' \
                '-Relations-\n{relations}\n' \
                '-Predicted relations-{pred_relations}'.format(
-                        text=self.text, annotations=annotations_string,
-                        pred_annotations=pred_annotations_string, relations=relations_string,
-                        pred_relations=pred_relations_string, abstract=self.is_abstract)
+            text=self.text, annotations=annotations_string,
+            pred_annotations=pred_annotations_string, relations=relations_string,
+            pred_relations=pred_relations_string, abstract=self.is_abstract)
 
     def get_size(self):
         """ just returns number of chars that this part contains """
         # OPTIONAL might be updated in order to represent annotations and such as well
         return len(self.text)
 
+    # Retrieves entity object from a list of annotations based on offset value.
+    def get_entity_obj(self, offset):
+        return list(filter(lambda ann: ann.offset == offset, self.annotations))
 
 class Edge:
     """
@@ -1031,8 +1011,10 @@ class Edge:
         check if the edge is present in part.relations.
         :rtype: bool
         """
-        relation_1 = Relation(self.entity1.offset, self.entity2.offset, self.entity1.text, self.entity2.text, self.relation_type)
-        relation_2 = Relation(self.entity2.offset, self.entity1.offset, self.entity2.text, self.entity1.text, self.relation_type)
+        relation_1 = Relation(self.entity1.offset, self.entity2.offset, self.entity1.text, self.entity2.text,
+                              self.relation_type)
+        relation_2 = Relation(self.entity2.offset, self.entity1.offset, self.entity2.text, self.entity1.text,
+                              self.relation_type)
         for relation in self.part.relations:
             if relation_1 == relation:
                 return True
@@ -1041,7 +1023,8 @@ class Edge:
         return False
 
     def __repr__(self):
-        return 'Edge between "{0}" and "{1}" of the type "{2}".'.format(self.entity1.text, self.entity2.text, self.relation_type)
+        return 'Edge between "{0}" and "{1}" of the type "{2}".'.format(self.entity1.text, self.entity2.text,
+                                                                        self.relation_type)
 
 
 class Token:
@@ -1175,6 +1158,7 @@ class Entity:
     :type tokens: list[nalaf.structures.data.Token]
     :type head_token: nalaf.structures.data.Token
     """
+
     def __init__(self, class_id, offset, text, confidence=1):
         self.class_id = class_id
         """the id of the class or entity that is annotated"""
@@ -1211,7 +1195,8 @@ class Entity:
     def __repr__(self):
         norm_string = ''
         if self.normalisation_dict:
-            norm_string = ', Normalisation Dict: {0}, Normalised text: "{1}"'.format(self.normalisation_dict, self.normalized_text)
+            norm_string = ', Normalisation Dict: {0}, Normalised text: "{1}"'.format(self.normalisation_dict,
+                                                                                     self.normalized_text)
         return 'Entity(ClassID: "{self.class_id}", Offset: {self.offset}, ' \
                'Text: "{self.text}", SubClass: {self.subclass}, ' \
                'Confidence: {self.confidence}{norm})'.format(self=self, norm=norm_string)
@@ -1265,16 +1250,19 @@ class Relation:
     :type class_id: str
     """
 
-    def __init__(self, start1, start2, text1, text2, type_of_relation):
+    def __init__(self, start1, start2, text1, text2, type_of_relation, entity1, entity2):
         self.start1 = start1
         self.start2 = start2
         self.text1 = text1
         self.text2 = text2
         self.class_id = type_of_relation
+        self.entity1 = entity1
+        self.entity2 = entity2
 
     def __repr__(self):
         return 'Relation(Class ID:"{self.class_id}", Start1:{self.start1}, Text1:"{self.text1}", ' \
-               'Start2:{self.start2}, Text2:"{self.text2}")'.format(self=self)
+               'Start2:{self.start2}, Text2:"{self.text2}", entity1:"{self.entity1}", entity2:"{self.entity2}")'.format(
+            self=self)
 
     def get_relation_without_offset(self):
         """:return string with entity1 and entity2 separated by relation type"""

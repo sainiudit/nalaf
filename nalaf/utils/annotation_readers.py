@@ -95,7 +95,11 @@ class AnnJsonAnnotationReader(AnnotationReader):
                                 e2_end = int(relation['entities'][1].split('|')[1].split(',')[1])
                                 e1_text = part.text[e1_start:e1_end]
                                 e2_text = part.text[e2_start:e2_end]
-                                part.relations.append(Relation(e1_start, e2_start, e1_text, e2_text, relation['classId']))
+
+                                entity1 = part.get_entity_obj(e1_start)
+                                entity2 = part.get_entity_obj(e2_start)
+
+                                part.relations.append(Relation(e1_start, e2_start, e1_text, e2_text, relation['classId'], entity1, entity2))
 
                         # delete parts that are not annotatable
                         annotatable_parts = set(ann_json['annotatable']['parts'])

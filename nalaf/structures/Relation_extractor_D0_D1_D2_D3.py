@@ -3,7 +3,8 @@
 from nalaf.utils.readers import HTMLReader
 from nalaf.utils.annotation_readers import AnnJsonAnnotationReader
 from nalaf.structures.relation_pipelines import RelationExtractionPipeline
-from nalaf.preprocessing.tokenizers import TmVarTokenizer
+from nalaf.preprocessing.tokenizers import TmVarTokenizer, NLTK_TOKENIZER
+from nalaf.preprocessing.spliters import NLTKSplitter
 from nalaf.preprocessing.parsers import SpacyParser
 from spacy.en import English
 
@@ -24,10 +25,10 @@ def parse_arguments(argv):
     #TODO: Parse the argument.
     parser = argparse.ArgumentParser(description='Simple-evaluate relna corpus corpus')
 
-    parser.add_argument('--D0', default="yes", choices=["yes", "no"])
-    parser.add_argument('--D1', default="yes", choices=["yes", "no"])
-    parser.add_argument('--D2', default="yes", choices=["yes", "no"])
-    parser.add_argument('--D3', default="yes", choices=["yes", "no"])
+    # parser.add_argument('--D0', default="yes", choices=["yes", "no"])
+    # parser.add_argument('--D1', default="yes", choices=["yes", "no"])
+    # parser.add_argument('--D2', default="yes", choices=["yes", "no"])
+    # parser.add_argument('--D3', default="yes", choices=["yes", "no"])
     # TODO : Add necessary command line arguments
     parser.add_argument('--corpus', default="relna", choices=["LocText", "relna"])
     parser.add_argument('--use_tk', default=False, action='store_true')
@@ -76,27 +77,77 @@ def RelationExtractor(argv=None):
         return dataset
 
     # Extracts true relations in D0, D1, D2 and D3
-    def Extract_True_Relation_For_D0_D1_D2_D3(self):
+    def Extract_True_Relation_For_D0_D1_D2_D3():
 
         if args.use_full_corpus:
             dataset = read_dataset()
         else:
             dataset, _ = read_dataset().percentage_split(0.1)
 
-        pipeline = RelationExtractionPipeline('e_1', 'e_2', rel_type, parser=parser, tokenizer=TmVarTokenizer())
-
-        try:
-            gen = dataset.tokens()
-            next(gen)
-        except StopIteration:
-            pipeline.splitter.split(dataset)
-            pipeline.tokenizer.tokenize(dataset)
+        extractor = RelationExtractionPipeline('e_1', 'e_2', rel_type, parser=parser, splitter=NLTKSplitter(), tokenizer=NLTK_TOKENIZER)
+        #
+        # try:
+        #     gen = dataset.tokens()
+        #     next(gen)
+        # except StopIteration:
+        #     pipeline.splitter.split(dataset)
+        #     pipeline.tokenizer.tokenize(dataset)
 
         # D0 - relations in Same sentences.
-        count_of_D0 = pipeline.edge_generator.count_relations_in_D0(dataset)
+        # count_of_D0 = pipeline.edge_generator.count_relations_in_D0(dataset)
 
         # D1 - relations in sentences which are 1 sentence apart.
-        count_of_D1, count_of_D2, count_of_D3, count_of_D4_plus = pipeline.edge_generator.count_relations_in_D1_D2_D3_D4(dataset)
+        # count_of_D1, count_of_D2, count_of_D3, count_of_D4_plus = pipeline.edge_generator.count_relations_in_D1_D2_D3_D4(dataset)
+
+        # all_sentences = list(dataset.sentences())
+        # Relation (class) is unhashable.
+        # set_of_relations = set(all_relations)
+        # print(set_of_relations)
+        # print(all_relations)
+
+        # all_annotations = list(dataset.all_annotations_with_ids())
+        # print(all_annotations)
+
+        extractor.splitter.split(dataset)
+        extractor.tokenizer.tokenize(dataset)
+        all_relations = list(dataset.relations())
+        all_parts = list(dataset.parts())
+
+        count_of_D0 = 0
+        count_of_D1 = 0
+        count_of_D2 = 0
+        count_of_D3 = 0
+        count_of_D4_plus = 0
+
+        for relation in all_relations:
+            for part in all_parts:
+                e1_index = part.get_sentence_index_for_annotation(relation.entity1[0])
+                e2_index = part.get_sentence_index_for_annotation(relation.entity2[0])
+
+                if abs(e1_index - e2_index) == 0:
+                    count_of_D0+=1
+                elif abs(e1_index - e2_index) == 1:
+                    count_of_D1+=1
+                elif abs(e1_index - e2_index) == 2:
+                    count_of_D2 += 1
+                elif abs(e1_index - e2_index) == 3:
+                    count_of_D3 += 1
+                else:
+                    count_of_D4_plus += 1
+
+        # for part in dataset.parts():
+        #     for rel in part.relations:
+        #         print(rel.en)
+        #         print(part.get_sentence_index_for_annotation(rel.entity1[0]))
+        #         print(part.get_sentence_index_for_annotation(rel.entity2[0]))
+
+                # print(rel.entity1)
+                # print(rel.entity2)
+        # print("All relations")
+        # print(len(all_relations))
+
+        # print("All Sentences \n")
+        # print(len(all_sentences))
 
         print("\n ********************* True relation count is as follows **********************\n")
         print("\n D0 - relations in Same sentences -----------------------------------------> ", count_of_D0)
